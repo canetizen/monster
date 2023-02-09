@@ -3,28 +3,36 @@
 #include <time.h>
 #include <conio.h>
 #include <stdbool.h>
-#include <windows.h>
 
 #define EDGE 25 // EDGE * EDGE playground
-#define DELAY 0.1 // in seconds
+#define DELAY 50 // in miliseconds
+#define ESC 27
+#define UP 100
+#define DOWN 97
+#define LEFT 119
+#define RIGHT 115
 
 void create_table(char (*table)[EDGE + 1]);
 bool game(char (*table)[EDGE + 1]);
-void print_table(char (*table)[EDGE + 1], int);
+void print_table(char (*table)[EDGE + 1], int&);
 void delay(double);
 void generate_apple(char (*table)[EDGE + 1]);
 bool choice(char (*table)[EDGE + 1]);
-void ClearScreen(); // for update output
-void ShowConsoleCursor(bool); // for hiding underscore cursor
+void insert(int&, int&, char (*table)[EDGE + 1], int&);
+void move_to_left(int&, int&, char (*table)[EDGE + 1], int&, int&);
+void move_to_right(int&, int&, char (*table)[EDGE + 1], int&, int&);
+void move_to_up(int&, int&, char (*table)[EDGE + 1], int&, int&);
+void move_to_down(int&, int&, char (*table)[EDGE + 1], int&, int&);
+
 
 int main() {
-	ShowConsoleCursor(false);
 	char table[EDGE][EDGE + 1];
 	srand(time(NULL));
 	do {
-		system("cls");
+		system("clear");
 		create_table(table);
-		print_table(table, 0);
+		int initial = 0;
+		print_table(table, initial);
 	} while(game(table));
 	
 	return EXIT_SUCCESS;
@@ -49,84 +57,89 @@ bool game(char (*table)[EDGE + 1]) {
 	int result = 0;
 	generate_apple(table);
 	bool flag = true;
+	int previous_direction = -1;
     while (flag) {
-		char ch = getch();
+		int ch = (int) getch();
 		do {
-			switch ((int) ch) {
-				case 27: exit(0);
-				case 97:
+			switch (ch) {
+				case ESC: exit(0);
+				case DOWN:
 				{
-					if (table[x][y - 1] != '%') {
-						if (table[x][y - 1] == '*') {
-							result++;
-							generate_apple(table);
+					if (previous_direction != UP) {
+						if (table[x][y - 1] != '%' && previous_direction != UP) {
+							move_to_down(x, y, table, result, previous_direction);
 						}
-						table[x][y - 1] = '0';
-						table[x][y] = ' ';
-						y--;
+						else
+							flag = false;
+						break;
 					}
-					else
-						flag = false;
-					break;
+					else {
+						ch = UP;
+						continue;
+					}
 				}
-				case 100:
+				case UP:
 				{
-					if (table[x][y + 1] != '%') {
-						if (table[x][y + 1] == '*') {
-							result++;
-							generate_apple(table);
+					if (previous_direction != DOWN) {
+						if (table[x][y + 1] != '%' && previous_direction != DOWN) {
+							move_to_up(x, y, table, result, previous_direction);
 						}
-						table[x][y + 1] = '0';
-						table[x][y] = ' ';
-						y++;
+						else
+							flag = false;
+						break;
 					}
-					else
-						flag = false;
-					break;
+					else {
+						ch = DOWN;
+						continue;
+					}
 				}
-				case 119:
+				case LEFT:
 				{
-					if (table[x - 1][y] != '%') {
-						if (table[x - 1][y] == '*') {
-							result++;
-							generate_apple(table);
+					if (previous_direction != RIGHT) {
+						if (table[x - 1][y] != '%' && previous_direction != RIGHT) {
+							move_to_left(x, y, table, result, previous_direction);
 						}
-						table[x - 1][y] = '0';
-						table[x][y] = ' ';
-						x--;
+						else
+							flag = false;
+						break;
 					}
-					else
-						flag = false;
-					break;
+					else {
+						ch = RIGHT;
+						continue;
+					}
 				}
-				case 115:
+				case RIGHT:
 				{
-					if (table[x + 1][y] != '%') {
-						if (table[x + 1][y] == '*') {
-							result++;
-							generate_apple(table);
+					if (previous_direction != LEFT) {
+						if (table[x + 1][y] != '%') {
+							move_to_right(x, y, table, result, previous_direction);
 						}
-						table[x + 1][y] = '0';
-						table[x][y] = ' ';
-						x++;
+						else
+							flag = false;
+						break;
 					}
-					else
-						flag = false;
-					break;
+					else {
+						ch = LEFT;
+						continue;
+					}
 				}
-				default: printf("The game has stopped!\n"); break;
+				default:
+				{
+					ch = previous_direction;
+					continue;
+				}
 			}
-			printf("%*s", 21, " ");
 			print_table(table, result);
-			delay(DELAY - result * 0.005);
+			delay(DELAY - result * 0.01);
 		} while(!kbhit() && flag);
 	}
 	return choice(table);
 }
 
-void print_table(char (*table)[EDGE + 1], int result) {
-	ClearScreen();
-	printf("Canetizen Kojima Proudly Presents...\n");
+void print_table(char (*table)[EDGE + 1], int &result) {
+	system("clear");
+	fflush(stdin);
+	printf("Canetizen Proudly Presents...\n");
 	printf("Press [w] - [a] - [s] - [d] to play. Press [ESC] to quit.\n");
 	printf("\n");
 	for (int i = 0; i < EDGE; i++) {
@@ -138,9 +151,9 @@ void print_table(char (*table)[EDGE + 1], int result) {
 }
 
 void delay(double number_of_seconds) {
-    int milli_seconds = 1000 * number_of_seconds;
+    int ms = 1000 * number_of_seconds;
     clock_t start_time = clock();
-    while (clock() < start_time + milli_seconds);
+    while (clock() < start_time + ms);
 }
 
 void generate_apple(char (*table)[EDGE + 1]) {
@@ -163,17 +176,42 @@ bool choice(char (*table)[EDGE + 1]) {
 	return true;
 }
 
-void ClearScreen() {	
-	COORD cursorPosition;	
-	cursorPosition.X = 0;	
-	cursorPosition.Y = 0;	
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPosition);
+void insert(int &x, int &y, char (*table)[EDGE + 1], int &result) {
+	if (table[x][y] == '*') {
+		result++;
+		generate_apple(table);
+	}
+	table[x][y] = '0';
 }
 
-void ShowConsoleCursor(bool showFlag) {
-    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_CURSOR_INFO     cursorInfo;
-    GetConsoleCursorInfo(out, &cursorInfo);
-    cursorInfo.bVisible = showFlag; // set the cursor visibility
-    SetConsoleCursorInfo(out, &cursorInfo);
+void move_to_left(int &x, int &y, char (*table)[EDGE + 1], int &result, int &previous_direction) {
+	int new_value = x - 1;
+	insert(new_value, y, table, result);
+	table[x][y] = ' ';
+	x--;
+	previous_direction = LEFT;
+}
+
+void move_to_right(int &x, int &y, char (*table)[EDGE + 1], int &result, int &previous_direction) {
+	int new_value = x + 1;
+	insert(new_value, y, table, result);
+	table[x][y] = ' ';
+	x++;
+	previous_direction = RIGHT;
+}
+
+void move_to_up(int &x, int &y, char (*table)[EDGE + 1], int &result, int &previous_direction) {
+	int new_value = y + 1;
+	insert(x, new_value, table, result);
+	table[x][y] = ' ';
+	y++;
+	previous_direction = UP;
+}
+
+void move_to_down(int &x, int &y, char (*table)[EDGE + 1], int &result, int &previous_direction) {
+	int new_value = y - 1;
+	insert(x, new_value, table, result);
+	table[x][y] = ' ';
+	y--;
+	previous_direction = DOWN;
 }
