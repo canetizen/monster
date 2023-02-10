@@ -42,6 +42,7 @@ void set_snake(Snake*, char (*table)[EDGE + 1]);
 void hide_snake(Snake*, char (*table)[EDGE + 1]);
 void destructor(Snake*);
 Body* constructor (int, int, char);
+void clear();
 
 int main() {
 	Snake* snake = (Snake*) malloc(sizeof(Snake));
@@ -52,7 +53,7 @@ int main() {
 		if (snake->snake_head != NULL)
 			destructor(snake);
 		snake->snake_head = constructor(center, center, SNAKE_HEAD);
-		system("clear");
+		clear();
 		create_table(table, snake);
 		int initial = 0;
 		print_table(table, initial);
@@ -179,7 +180,7 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 }
 
 void print_table(char (*table)[EDGE + 1], int &result) {
-	system("clear");
+	clear();
 	printf("Canetizen Proudly Presents...\n");
 	printf("Press [w] - [a] - [s] - [d] to play. Press [ESC] to quit.\n");
 	printf("\n");
@@ -285,4 +286,12 @@ void set_snake(Snake* snake, char (*table)[EDGE + 1]) {
         table[temp->x][temp->y] = temp->symbol;
         temp = temp->next;
     }		
+}
+
+void clear() {
+	#ifdef WINDOWS
+		system("cls");
+	#else
+		system ("clear");
+	#endif
 }
