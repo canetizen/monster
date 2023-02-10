@@ -41,22 +41,25 @@ void eat(int, int, char (*table)[EDGE + 1], Snake*, int&);
 void set_snake(Snake*, char (*table)[EDGE + 1]);
 void hide_snake(Snake*, char (*table)[EDGE + 1]);
 void destructor(Snake*);
-Body* constructor (Snake*, int, int, char);
+Body* constructor (int, int, char);
 
 int main() {
-	Snake* snake;
+	Snake* snake = (Snake*) malloc(sizeof(Snake));
 	int center = EDGE / 2;
 	char table[EDGE][EDGE + 1];
 	srand(time(NULL));
 	do {
-		snake = (Snake*) malloc(sizeof(Snake));
-		snake->snake_head = constructor(snake, center, center, SNAKE_HEAD);
+		if (snake->snake_head != NULL)
+			destructor(snake);
+		snake->snake_head = constructor(center, center, SNAKE_HEAD);
 		system("clear");
 		create_table(table, snake);
 		int initial = 0;
 		print_table(table, initial);
 	} while(game(table, snake));
 	destructor(snake);
+	free(snake);
+	snake = NULL;
 	return EXIT_SUCCESS;
 } 
 
@@ -86,6 +89,8 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 				case ESC: 
 				{
 					destructor(snake);
+					free(snake);
+					snake = NULL;
 					exit(0);
 				}
 				case DOWN:
@@ -94,17 +99,14 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 						if (table[snake->snake_head->x][snake->snake_head->y - 1] != EDGE_TYPE && table[snake->snake_head->x][snake->snake_head->y - 1] != SNAKE_BODY) {
 							if (table[snake->snake_head->x][snake->snake_head->y - 1] == BAIT) {
 								eat(snake->snake_head->x, snake->snake_head->y - 1, table, snake, result);
-							}
-							else {
+							} else {
 								shift(snake->snake_head->x, snake->snake_head->y - 1, table, snake);
 							}		
 							previous_direction = DOWN;				
-						}
-						else
+						} else
 							flag = false;
 						break;
-					}
-					else {
+					} else {
 						ch = UP;
 						continue;
 					}
@@ -115,17 +117,14 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 						if (table[snake->snake_head->x][snake->snake_head->y + 1] != EDGE_TYPE && table[snake->snake_head->x][snake->snake_head->y + 1] != SNAKE_BODY) {
 							if (table[snake->snake_head->x][snake->snake_head->y + 1] == BAIT) {
 								eat(snake->snake_head->x, snake->snake_head->y + 1, table, snake, result);
-							}
-							else {
+							} else {
 								shift(snake->snake_head->x, snake->snake_head->y + 1, table, snake);
 							}
 							previous_direction = UP;	
-						}
-						else
+						} else
 							flag = false;
 						break;
-					}
-					else {
+					} else {
 						ch = DOWN;
 						continue;
 					}
@@ -136,17 +135,14 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 						if (table[snake->snake_head->x - 1][snake->snake_head->y] != EDGE_TYPE && table[snake->snake_head->x - 1][snake->snake_head->y] != SNAKE_BODY) {
 							if (table[snake->snake_head->x - 1][snake->snake_head->y] == BAIT) {
 								eat(snake->snake_head->x - 1, snake->snake_head->y, table, snake, result);
-							}
-							else {
+							} else {
 								shift(snake->snake_head->x - 1, snake->snake_head->y, table, snake);
 							}
 							previous_direction = LEFT;					
-						}
-						else
+						} else
 							flag = false;
 						break;
-					}
-					else {
+					} else {
 						ch = RIGHT;
 						continue;
 					}
@@ -157,17 +153,14 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 						if (table[snake->snake_head->x + 1][snake->snake_head->y] != EDGE_TYPE && table[snake->snake_head->x + 1][snake->snake_head->y] != SNAKE_BODY) {
 							if (table[snake->snake_head->x + 1][snake->snake_head->y] == BAIT) {
 								eat(snake->snake_head->x + 1, snake->snake_head->y, table, snake, result);
-							}
-							else {
+							} else {
 								shift(snake->snake_head->x + 1, snake->snake_head->y, table, snake);
 							}
 							previous_direction = RIGHT;
-						}
-						else
+						} else
 							flag = false;
 						break;
-					}
-					else {
+					} else {
 						ch = LEFT;
 						continue;
 					}
@@ -227,17 +220,18 @@ bool choice(char (*table)[EDGE + 1]) {
 
 void destructor(Snake* snake) {
 	Body* temp = snake->snake_head;
+    Body* temp2;
 	while (temp != NULL) {
-		Body* temp2 = temp->next;
+		temp2 = temp->next;
 		free(temp);
 		temp = temp2;
 	}
-	free(snake);
-	snake = NULL;
+	snake->snake_head = NULL;
 }
 
-Body* constructor(Snake* snake, int x, int y, char symbol) {
+Body* constructor(int x, int y, char symbol) {
 	Body* new_body = (Body*) malloc(sizeof(Body));
+    new_body->next = NULL;
 	new_body->symbol = symbol;
 	new_body->x = x;
 	new_body->y = y;
@@ -246,13 +240,11 @@ Body* constructor(Snake* snake, int x, int y, char symbol) {
 
 void shift(int x, int y, char (*table)[EDGE + 1], Snake* snake) {
 	hide_snake(snake, table);
-    Body* new_body = constructor(snake, x, y, SNAKE_HEAD);
+    Body* new_body = constructor(x, y, SNAKE_HEAD);
     Body* temp = snake->snake_head;
-
 	if (snake->snake_head->next != NULL) {
-		while(temp->next->next != NULL) {
+		while(temp->next->next != NULL)
 			temp = temp->next;
-		}
 		free(temp->next);
 		temp->next = NULL;
 		new_body->next = snake->snake_head;
@@ -264,13 +256,12 @@ void shift(int x, int y, char (*table)[EDGE + 1], Snake* snake) {
 		free(prev_head);
 		prev_head = NULL;
 	}
-
 	set_snake(snake, table);
 }
 
 void eat(int x, int y, char (*table)[EDGE + 1], Snake* snake, int &result) {
 	hide_snake(snake, table);
-	Body* new_body = constructor(snake, snake->snake_head->x, snake->snake_head->y, SNAKE_BODY);
+	Body* new_body = constructor(snake->snake_head->x, snake->snake_head->y, SNAKE_BODY);
 	new_body->next = snake->snake_head->next;
 	snake->snake_head->next = new_body;
 	snake->snake_head->x = x;
