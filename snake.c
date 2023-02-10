@@ -8,7 +8,8 @@
 #define EDGE 25 // EDGE * EDGE playground
 #define DELAY 50 // in miliseconds
 #define EDGE_TYPE '%'
-#define SNAKE_HEAD '0'
+#define SNAKE_HEAD 'X'
+#define SNAKE_BODY '0'
 #define BAIT '*'
 
 //control settings
@@ -36,6 +37,9 @@ void delay(double);
 void generate_apple(char (*table)[EDGE + 1]);
 bool choice(char (*table)[EDGE + 1], Snake*);
 void shift(int, int, char (*table)[EDGE + 1], Snake*);
+void eat(int, int, char (*table)[EDGE + 1], Snake*, int&);
+void set_snake(Snake*, char (*table)[EDGE + 1]);
+void hide_snake(Snake*, char (*table)[EDGE + 1]);
 void destructor(Snake*);
 Body* constructor (Snake*, int, int, char);
 
@@ -52,8 +56,6 @@ int main() {
 		int initial = 0;
 		print_table(table, initial);
 	} while(game(table, snake));
-
-	destructor(snake);
 	return EXIT_SUCCESS;
 } 
 
@@ -88,11 +90,9 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 				case DOWN:
 				{
 					if (previous_direction != UP) {
-						if (table[snake->snake_head->x][snake->snake_head->y - 1] != EDGE_TYPE) {
-							if (table[snake->snake_head->x][snake->snake_head->y - 1] == '*') {
-								shift(snake->snake_head->x, snake->snake_head->y - 1, table, snake);
-								generate_apple(table);
-								result++;
+						if (table[snake->snake_head->x][snake->snake_head->y - 1] != EDGE_TYPE && table[snake->snake_head->x][snake->snake_head->y - 1] != SNAKE_BODY) {
+							if (table[snake->snake_head->x][snake->snake_head->y - 1] == BAIT) {
+								eat(snake->snake_head->x, snake->snake_head->y - 1, table, snake, result);
 							}
 							else {
 								shift(snake->snake_head->x, snake->snake_head->y - 1, table, snake);
@@ -111,11 +111,9 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 				case UP:
 				{
 					if (previous_direction != DOWN) {
-						if (table[snake->snake_head->x][snake->snake_head->y + 1] != EDGE_TYPE) {
-							if (table[snake->snake_head->x][snake->snake_head->y + 1] == '*') {
-								shift(snake->snake_head->x, snake->snake_head->y + 1, table, snake);
-								generate_apple(table);
-								result++;
+						if (table[snake->snake_head->x][snake->snake_head->y + 1] != EDGE_TYPE && table[snake->snake_head->x][snake->snake_head->y + 1] != SNAKE_BODY) {
+							if (table[snake->snake_head->x][snake->snake_head->y + 1] == BAIT) {
+								eat(snake->snake_head->x, snake->snake_head->y + 1, table, snake, result);
 							}
 							else {
 								shift(snake->snake_head->x, snake->snake_head->y + 1, table, snake);
@@ -134,11 +132,9 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 				case LEFT:
 				{
 					if (previous_direction != RIGHT) {
-						if (table[snake->snake_head->x - 1][snake->snake_head->y] != EDGE_TYPE) {
-							if (table[snake->snake_head->x - 1][snake->snake_head->y] == '*') {
-								shift(snake->snake_head->x - 1, snake->snake_head->y, table, snake);
-								generate_apple(table);
-								result++;
+						if (table[snake->snake_head->x - 1][snake->snake_head->y] != EDGE_TYPE && table[snake->snake_head->x - 1][snake->snake_head->y] != SNAKE_BODY) {
+							if (table[snake->snake_head->x - 1][snake->snake_head->y] == BAIT) {
+								eat(snake->snake_head->x - 1, snake->snake_head->y, table, snake, result);
 							}
 							else {
 								shift(snake->snake_head->x - 1, snake->snake_head->y, table, snake);
@@ -157,11 +153,9 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 				case RIGHT:
 				{
 					if (previous_direction != LEFT) {
-						if (table[snake->snake_head->x + 1][snake->snake_head->y] != EDGE_TYPE) {
-							if (table[snake->snake_head->x + 1][snake->snake_head->y] == '*') {
-								shift(snake->snake_head->x + 1, snake->snake_head->y, table, snake);
-								generate_apple(table);
-								result++;
+						if (table[snake->snake_head->x + 1][snake->snake_head->y] != EDGE_TYPE && table[snake->snake_head->x + 1][snake->snake_head->y] != SNAKE_BODY) {
+							if (table[snake->snake_head->x + 1][snake->snake_head->y] == BAIT) {
+								eat(snake->snake_head->x + 1, snake->snake_head->y, table, snake, result);
 							}
 							else {
 								shift(snake->snake_head->x + 1, snake->snake_head->y, table, snake);
@@ -214,7 +208,7 @@ void generate_apple(char (*table)[EDGE + 1]) {
 	do {
 		x_axis = (rand() %(EDGE - 2)) + 1;
 		y_axis = (rand() %(EDGE - 2)) + 1;
-	} while (table[x_axis][y_axis] == SNAKE_HEAD || table[x_axis][y_axis] == '.');
+	} while (table[x_axis][y_axis] == SNAKE_HEAD || table[x_axis][y_axis] == SNAKE_BODY);
 	table[x_axis][y_axis] = BAIT;
 }
 
@@ -224,9 +218,10 @@ bool choice(char (*table)[EDGE + 1], Snake* snake) {
 		printf("You lost. Try again -> [y], Quit -> [n]\n");
 		flag = getch();
 	} while (flag != 'y' && flag != 'n');
-	if (flag == 'n'|| (int) flag == 27)
+	if (flag == 'n'|| (int) flag == 27) {
+		destructor(snake);
 		return false;
-	destructor(snake);
+	}
 	return true;
 }
 
@@ -248,15 +243,52 @@ Body* constructor(Snake* snake, int x, int y, char symbol) {
 }
 
 void shift(int x, int y, char (*table)[EDGE + 1], Snake* snake) {
-	Body* temp = snake->snake_head;
-	while(temp->next != NULL) {
-		temp->next->x = temp->x;
-		temp->next->y = temp->y;
-		table[temp->next->x][temp->next->y] = temp->next->symbol;
-		temp = temp->next;
+	hide_snake(snake, table);
+    Body* new_body = constructor(snake, x, y, SNAKE_HEAD);
+    Body* temp = snake->snake_head;
+
+	if (snake->snake_head->next != NULL) {
+		while(temp->next->next != NULL) {
+			temp = temp->next;
+		}
+		free(temp->next);
+		temp->next = NULL;
+		new_body->next = snake->snake_head;
+		snake->snake_head->symbol = SNAKE_BODY;
+		snake->snake_head = new_body;  
+	} else {
+		Body* prev_head = snake->snake_head;
+		snake->snake_head = new_body;  
+		free(prev_head);
 	}
-	table[temp->x][temp->y] = ' ';
+
+	set_snake(snake, table);
+}
+
+void eat(int x, int y, char (*table)[EDGE + 1], Snake* snake, int &result) {
+	hide_snake(snake, table);
+	Body* new_body = constructor(snake, snake->snake_head->x, snake->snake_head->y, SNAKE_BODY);
+	new_body->next = snake->snake_head->next;
+	snake->snake_head->next = new_body;
 	snake->snake_head->x = x;
 	snake->snake_head->y = y;
-	table[snake->snake_head->x][snake->snake_head->y] = snake->snake_head->symbol;
+	set_snake(snake, table);
+	generate_apple(table);
+	result++;
+}
+
+void hide_snake(Snake* snake, char (*table)[EDGE + 1]) {
+    Body* temp = snake->snake_head;
+    while (temp != NULL) {
+        table[temp->x][temp->y] = ' ';
+        temp = temp->next;
+    }
+}
+
+void set_snake(Snake* snake, char (*table)[EDGE + 1]) {
+    Body* temp = snake->snake_head;
+    while (temp != NULL) {
+        table[temp->x][temp->y] = temp->symbol;
+        temp = temp->next;
+    }		
 }
