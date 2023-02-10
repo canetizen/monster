@@ -35,7 +35,7 @@ bool game(char (*table)[EDGE + 1], Snake*);
 void print_table(char (*table)[EDGE + 1], int&);
 void delay(double);
 void generate_apple(char (*table)[EDGE + 1]);
-bool choice(char (*table)[EDGE + 1], Snake*);
+bool choice(char (*table)[EDGE + 1]);
 void shift(int, int, char (*table)[EDGE + 1], Snake*);
 void eat(int, int, char (*table)[EDGE + 1], Snake*, int&);
 void set_snake(Snake*, char (*table)[EDGE + 1]);
@@ -56,6 +56,7 @@ int main() {
 		int initial = 0;
 		print_table(table, initial);
 	} while(game(table, snake));
+	destructor(snake);
 	return EXIT_SUCCESS;
 } 
 
@@ -181,7 +182,7 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 			delay(DELAY - result * 0.1);
 		} while(!kbhit() && flag);
 	}
-	return choice(table, snake);
+	return choice(table);
 }
 
 void print_table(char (*table)[EDGE + 1], int &result) {
@@ -212,14 +213,13 @@ void generate_apple(char (*table)[EDGE + 1]) {
 	table[x_axis][y_axis] = BAIT;
 }
 
-bool choice(char (*table)[EDGE + 1], Snake* snake) {
+bool choice(char (*table)[EDGE + 1]) {
 	char flag;
 	do {
 		printf("You lost. Try again -> [y], Quit -> [n]\n");
 		flag = getch();
 	} while (flag != 'y' && flag != 'n');
 	if (flag == 'n'|| (int) flag == 27) {
-		destructor(snake);
 		return false;
 	}
 	return true;
@@ -232,6 +232,8 @@ void destructor(Snake* snake) {
 		free(temp);
 		temp = temp2;
 	}
+	free(snake);
+	snake = NULL;
 }
 
 Body* constructor(Snake* snake, int x, int y, char symbol) {
@@ -260,6 +262,7 @@ void shift(int x, int y, char (*table)[EDGE + 1], Snake* snake) {
 		Body* prev_head = snake->snake_head;
 		snake->snake_head = new_body;  
 		free(prev_head);
+		prev_head = NULL;
 	}
 
 	set_snake(snake, table);
