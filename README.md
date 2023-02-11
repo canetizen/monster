@@ -1,2 +1,2 @@
 # Snake
-Classic snake game. conio.h library for Linux systems: https://github.com/zoelabbb/conio.h
+Classic snake game. Helpful repository contains conio.h library for Linux systems: https://github.com/zoelabbb/conio.h
