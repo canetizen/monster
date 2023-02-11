@@ -6,10 +6,10 @@
 
 //playground settings
 #define EDGE 25 // EDGE * EDGE playground
-#define DELAY 50 // in miliseconds
+#define DELAY 50 // in milliseconds
 #define EDGE_TYPE '%'
 #define SNAKE_HEAD 'X'
-#define SNAKE_BODY '0'
+#define SNAKE_BODY 'o'
 #define BAIT '*'
 
 //control settings
@@ -31,33 +31,31 @@ typedef struct {
 } Snake;
 
 void create_table(char (*table)[EDGE + 1], Snake*);
-bool game(char (*table)[EDGE + 1], Snake*);
-void print_table(char (*table)[EDGE + 1], int&);
+bool game(char (*table)[EDGE + 1], Snake*, int&);
+void print_table(char (*table)[EDGE + 1], int&, int&);
 void delay(double);
 void generate_apple(char (*table)[EDGE + 1]);
 bool choice(char (*table)[EDGE + 1]);
 void shift(int, int, char (*table)[EDGE + 1], Snake*);
 void eat(int, int, char (*table)[EDGE + 1], Snake*, int&);
-void set_snake(Snake*, char (*table)[EDGE + 1]);
-void hide_snake(Snake*, char (*table)[EDGE + 1]);
 void destructor(Snake*);
 Body* constructor (int, int, char);
 void clear();
 
 int main() {
 	Snake* snake = (Snake*) malloc(sizeof(Snake));
-	int center = EDGE / 2;
 	char table[EDGE][EDGE + 1];
 	srand(time(NULL));
+    int best = 0;
 	do {
 		if (snake->snake_head != NULL)
 			destructor(snake);
-		snake->snake_head = constructor(center, center, SNAKE_HEAD);
+		snake->snake_head = constructor(EDGE / 2, EDGE / 2, SNAKE_HEAD);
 		clear();
 		create_table(table, snake);
 		int initial = 0;
-		print_table(table, initial);
-	} while(game(table, snake));
+		print_table(table, initial, best);
+	} while(game(table, snake, best));
 	destructor(snake);
 	free(snake);
 	snake = NULL;
@@ -78,7 +76,7 @@ void create_table(char (*table)[EDGE + 1], Snake* snake) {
 	table[EDGE / 2][EDGE / 2] = snake->snake_head->symbol;	
 }
 
-bool game(char (*table)[EDGE + 1], Snake* snake) {
+bool game(char (*table)[EDGE + 1], Snake* snake, int &best) {
 	int result = 0;
 	generate_apple(table);
 	bool flag = true;
@@ -172,14 +170,16 @@ bool game(char (*table)[EDGE + 1], Snake* snake) {
 					continue;
 				}
 			}
-			print_table(table, result);
+            if (result > best)
+                best = result;
+			print_table(table, result, best);
 			delay(DELAY - result * 0.1);
 		} while(!kbhit() && flag);
 	}
 	return choice(table);
 }
 
-void print_table(char (*table)[EDGE + 1], int &result) {
+void print_table(char (*table)[EDGE + 1], int &result, int &best) {
 	clear();
 	printf("Canetizen Proudly Presents...\n");
 	printf("Press [w] - [a] - [s] - [d] to play. Press [ESC] to quit.\n");
@@ -189,6 +189,7 @@ void print_table(char (*table)[EDGE + 1], int &result) {
 			printf("%c", table[i][j]);
 		printf("\n");
 	}
+    printf("Best Score: %d\n", best);
 	printf("Score: %d\n", result);
 }
 
@@ -240,52 +241,38 @@ Body* constructor(int x, int y, char symbol) {
 }
 
 void shift(int x, int y, char (*table)[EDGE + 1], Snake* snake) {
-	hide_snake(snake, table);
     Body* new_body = constructor(x, y, SNAKE_HEAD);
     Body* temp = snake->snake_head;
 	if (snake->snake_head->next != NULL) {
 		while(temp->next->next != NULL)
 			temp = temp->next;
+		table[temp->next->x][temp->next->y] = ' ';
 		free(temp->next);
 		temp->next = NULL;
 		new_body->next = snake->snake_head;
 		snake->snake_head->symbol = SNAKE_BODY;
+        table[snake->snake_head->x][snake->snake_head->y] = snake->snake_head->symbol;
 		snake->snake_head = new_body;  
 	} else {
 		Body* prev_head = snake->snake_head;
+		table[snake->snake_head->x][snake->snake_head->y] = ' ';
 		snake->snake_head = new_body;  
 		free(prev_head);
 		prev_head = NULL;
 	}
-	set_snake(snake, table);
+	table[new_body->x][new_body->y] = new_body->symbol;
 }
 
 void eat(int x, int y, char (*table)[EDGE + 1], Snake* snake, int &result) {
-	hide_snake(snake, table);
 	Body* new_body = constructor(snake->snake_head->x, snake->snake_head->y, SNAKE_BODY);
 	new_body->next = snake->snake_head->next;
 	snake->snake_head->next = new_body;
 	snake->snake_head->x = x;
 	snake->snake_head->y = y;
-	set_snake(snake, table);
+	table[new_body->x][new_body->y] = new_body->symbol;
+    table[snake->snake_head->x][snake->snake_head->y] = snake->snake_head->symbol;
 	generate_apple(table);
 	result++;
-}
-
-void hide_snake(Snake* snake, char (*table)[EDGE + 1]) {
-    Body* temp = snake->snake_head;
-    while (temp != NULL) {
-        table[temp->x][temp->y] = ' ';
-        temp = temp->next;
-    }
-}
-
-void set_snake(Snake* snake, char (*table)[EDGE + 1]) {
-    Body* temp = snake->snake_head;
-    while (temp != NULL) {
-        table[temp->x][temp->y] = temp->symbol;
-        temp = temp->next;
-    }		
 }
 
 void clear() {
