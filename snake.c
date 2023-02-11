@@ -51,7 +51,6 @@ int main() {
 		if (snake->snake_head != NULL)
 			destructor(snake);
 		snake->snake_head = constructor(EDGE / 2, EDGE / 2, SNAKE_HEAD);
-		clear();
 		create_table(table, snake);
 		int initial = 0;
 		print_table(table, initial, best);
@@ -63,6 +62,7 @@ int main() {
 } 
 
 void create_table(char (*table)[EDGE + 1], Snake* snake) {
+	clear();
 	for (int i = 0; i < EDGE; i++)
 		for (int j = 0; j < EDGE; j++)
 			table[i][j] = ' ';
@@ -189,7 +189,7 @@ void print_table(char (*table)[EDGE + 1], int &result, int &best) {
 			printf("%c", table[i][j]);
 		printf("\n");
 	}
-    printf("Best Score: %d\n", best);
+    	printf("Best Score: %d\n", best);
 	printf("Score: %d\n", result);
 }
 
@@ -222,7 +222,7 @@ bool choice(char (*table)[EDGE + 1]) {
 
 void destructor(Snake* snake) {
 	Body* temp = snake->snake_head;
-    Body* temp2;
+    	Body* temp2;
 	while (temp != NULL) {
 		temp2 = temp->next;
 		free(temp);
@@ -233,7 +233,7 @@ void destructor(Snake* snake) {
 
 Body* constructor(int x, int y, char symbol) {
 	Body* new_body = (Body*) malloc(sizeof(Body));
-    new_body->next = NULL;
+    	new_body->next = NULL;
 	new_body->symbol = symbol;
 	new_body->x = x;
 	new_body->y = y;
@@ -241,8 +241,8 @@ Body* constructor(int x, int y, char symbol) {
 }
 
 void shift(int x, int y, char (*table)[EDGE + 1], Snake* snake) {
-    Body* new_body = constructor(x, y, SNAKE_HEAD);
-    Body* temp = snake->snake_head;
+	Body* new_body = constructor(x, y, SNAKE_HEAD);
+    	Body* temp = snake->snake_head;
 	if (snake->snake_head->next != NULL) {
 		while(temp->next->next != NULL)
 			temp = temp->next;
@@ -251,7 +251,7 @@ void shift(int x, int y, char (*table)[EDGE + 1], Snake* snake) {
 		temp->next = NULL;
 		new_body->next = snake->snake_head;
 		snake->snake_head->symbol = SNAKE_BODY;
-        table[snake->snake_head->x][snake->snake_head->y] = snake->snake_head->symbol;
+	table[snake->snake_head->x][snake->snake_head->y] = snake->snake_head->symbol;
 		snake->snake_head = new_body;  
 	} else {
 		Body* prev_head = snake->snake_head;
@@ -270,7 +270,7 @@ void eat(int x, int y, char (*table)[EDGE + 1], Snake* snake, int &result) {
 	snake->snake_head->x = x;
 	snake->snake_head->y = y;
 	table[new_body->x][new_body->y] = new_body->symbol;
-    table[snake->snake_head->x][snake->snake_head->y] = snake->snake_head->symbol;
+    	table[snake->snake_head->x][snake->snake_head->y] = snake->snake_head->symbol;
 	generate_apple(table);
 	result++;
 }
