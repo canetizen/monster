@@ -12,6 +12,12 @@
 #define SNAKE_BODY 'o'
 #define BAIT '*'
 
+//color settings
+#define CGREEN "\x1B[32m"
+#define CCYAN  "\x1B[36m"
+#define CNORMAL  "\x1B[0m"
+
+
 //control settings
 #define ESC 27
 #define UP 100
@@ -181,16 +187,20 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int &best) {
 
 void print_table(char (*table)[EDGE + 1], int &result, int &best) {
 	clear();
-	printf("Canetizen Proudly Presents...\n");
-	printf("Press [w] - [a] - [s] - [d] to play. Press [ESC] to quit.\n");
+	printf(CCYAN "Canetizen Proudly Presents...\n");
+	printf(CCYAN "Press [w] - [a] - [s] - [d] to play. Press [ESC] to quit.\n");
 	printf("\n");
 	for (int i = 0; i < EDGE; i++) {
-		for (int j = 0; j < EDGE; j++)
-			printf("%c", table[i][j]);
+		for (int j = 0; j < EDGE; j++) {			
+			if (table[i][j] == SNAKE_HEAD || table[i][j] == SNAKE_BODY) 
+				printf("%s%c", CGREEN, table[i][j]);
+			else
+				printf("%s%c", CNORMAL,table[i][j]);								 				
+		}
 		printf("\n");
 	}
-	printf("Best Score: %d\n", best);
-	printf("Score: %d\n", result);
+	printf(CCYAN "Best Score: %d\n", best);
+	printf(CCYAN"Score: %d\n", result);
 }
 
 void delay(double number_of_seconds) {
