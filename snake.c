@@ -46,7 +46,7 @@ int main() {
 	Snake* snake = (Snake*) malloc(sizeof(Snake));
 	char table[EDGE][EDGE + 1];
 	srand(time(NULL));
-    int best = 0;
+	int best = 0;
 	do {
 		if (snake->snake_head != NULL)
 			destructor(snake);
@@ -81,7 +81,7 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int &best) {
 	generate_apple(table);
 	bool flag = true;
 	int previous_direction = -1;
-    while (flag) {
+	while (flag) {
 		int ch = (int) getch();
 		do {
 			switch (ch) {
@@ -170,8 +170,8 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int &best) {
 					continue;
 				}
 			}
-            if (result > best)
-                best = result;
+		    	if (result > best)
+				best = result;
 			print_table(table, result, best);
 			delay(DELAY - result * 0.1);
 		} while(!kbhit() && flag);
@@ -189,7 +189,7 @@ void print_table(char (*table)[EDGE + 1], int &result, int &best) {
 			printf("%c", table[i][j]);
 		printf("\n");
 	}
-    	printf("Best Score: %d\n", best);
+	printf("Best Score: %d\n", best);
 	printf("Score: %d\n", result);
 }
 
@@ -251,7 +251,7 @@ void shift(int x, int y, char (*table)[EDGE + 1], Snake* snake) {
 		temp->next = NULL;
 		new_body->next = snake->snake_head;
 		snake->snake_head->symbol = SNAKE_BODY;
-	table[snake->snake_head->x][snake->snake_head->y] = snake->snake_head->symbol;
+		table[snake->snake_head->x][snake->snake_head->y] = snake->snake_head->symbol;
 		snake->snake_head = new_body;  
 	} else {
 		Body* prev_head = snake->snake_head;
@@ -270,7 +270,7 @@ void eat(int x, int y, char (*table)[EDGE + 1], Snake* snake, int &result) {
 	snake->snake_head->x = x;
 	snake->snake_head->y = y;
 	table[new_body->x][new_body->y] = new_body->symbol;
-    	table[snake->snake_head->x][snake->snake_head->y] = snake->snake_head->symbol;
+	table[snake->snake_head->x][snake->snake_head->y] = snake->snake_head->symbol;
 	generate_apple(table);
 	result++;
 }
