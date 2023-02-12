@@ -17,7 +17,6 @@
 #define CCYAN  "\x1B[36m"
 #define CNORMAL  "\x1B[0m"
 
-
 //control settings
 #define ESC 27
 #define UP 100
@@ -295,7 +294,6 @@ void clear() {
 }
 
 //this function belongs to https://github.com/zoelabbb/conio.h header.
-
 int _kbhit() {
 	struct termios oldt, newt;
 	int ch;
