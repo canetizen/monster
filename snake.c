@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <conio.h>
+#include "conio_am.h"
 #include <stdbool.h>
 
 //playground settings
@@ -47,6 +47,7 @@ void eat(int, int, char (*table)[EDGE + 1], Snake*, int&);
 void destructor(Snake*);
 Body* constructor (int, int, char);
 void clear();
+int _kbhit();
 
 int main() {
 	Snake* snake = (Snake*) malloc(sizeof(Snake));
@@ -180,7 +181,7 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int &best) {
 				best = result;
 			print_table(table, result, best);
 			delay(DELAY - result * 0.1);
-		} while(!kbhit() && flag);
+		} while(!_kbhit() && flag);
 	}
 	return choice(table);
 }
@@ -291,4 +292,26 @@ void clear() {
 	#else
 		system ("clear");
 	#endif
+}
+
+//this function belongs to https://github.com/zoelabbb/conio.h header.
+
+int _kbhit() {
+	struct termios oldt, newt;
+	int ch;
+	int oldf;    
+	tcgetattr(STDIN_FILENO, &oldt);
+	newt = oldt;
+	newt.c_lflag &= ~(ICANON | ECHO);
+	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+	oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+	fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);    
+	ch = getchar();    
+	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+	fcntl(STDIN_FILENO, F_SETFL, oldf);    
+	if(ch != EOF){
+		ungetc(ch, stdin);
+	return 1;
+	}    
+	return 0;
 }
