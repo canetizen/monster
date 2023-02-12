@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "conio_am.h"
+#include <conio.h>
 #include <stdbool.h>
+
+#ifdef _WIN32	
+	#include <windows.h>
+#endif
 
 //playground settings
 #define EDGE 25 // EDGE * EDGE playground
@@ -46,9 +50,16 @@ void eat(int, int, char (*table)[EDGE + 1], Snake*, int&);
 void destructor(Snake*);
 Body* constructor (int, int, char);
 void clear();
-int _kbhit();
+
+#ifdef _WIN32
+	void ClearScreen();
+	void ShowConsoleCursor(bool); // hiding underscore cursor for Windows
+#endif
 
 int main() {
+	#ifdef _WIN32
+		ShowConsoleCursor(false);
+	#endif
 	Snake* snake = (Snake*) malloc(sizeof(Snake));
 	char table[EDGE][EDGE + 1];
 	srand(time(NULL));
@@ -180,7 +191,7 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int &best) {
 				best = result;
 			print_table(table, result, best);
 			delay(DELAY - result * 0.1);
-		} while(!_kbhit() && flag);
+		} while(!kbhit() && flag);
 	}
 	return choice(table);
 }
@@ -286,30 +297,26 @@ void eat(int x, int y, char (*table)[EDGE + 1], Snake* snake, int &result) {
 }
 
 void clear() {
-	#ifdef WINDOWS
-		system("cls");
+	#ifdef _WIN32
+		ClearScreen();
 	#else
-		system ("clear");
+		system("clear");
 	#endif
 }
 
-//this function belongs to https://github.com/zoelabbb/conio.h header.
-int _kbhit() {
-	struct termios oldt, newt;
-	int ch;
-	int oldf;    
-	tcgetattr(STDIN_FILENO, &oldt);
-	newt = oldt;
-	newt.c_lflag &= ~(ICANON | ECHO);
-	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-	oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
-	fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);    
-	ch = getchar();    
-	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-	fcntl(STDIN_FILENO, F_SETFL, oldf);    
-	if(ch != EOF){
-		ungetc(ch, stdin);
-	return 1;
-	}    
-	return 0;
-}
+#ifdef _WIN32
+	void ClearScreen() {	
+		COORD cursorPosition;	
+		cursorPosition.X = 0;	
+		cursorPosition.Y = 0;	
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPosition);
+	}
+
+	void ShowConsoleCursor(bool showFlag) {
+		HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+		CONSOLE_CURSOR_INFO     cursorInfo;
+		GetConsoleCursorInfo(out, &cursorInfo);
+		cursorInfo.bVisible = showFlag; // set the cursor visibility
+		SetConsoleCursorInfo(out, &cursorInfo);
+	}
+#endif
