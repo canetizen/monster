@@ -1,2 +1,4 @@
 # Snake
-Classic snake game. Helpful repository contains conio.h library installation for Linux systems: https://github.com/zoelabbb/conio.h
+Classic snake game. Helpful sources contain conio.h library adaptations for Linux systems: 
+https://sourceforge.net/projects/coniohcloneturboccpp/
+https://github.com/zoelabbb/conio.h
