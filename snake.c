@@ -59,12 +59,15 @@ void clear();
 int main() {
 	#ifdef _WIN32
 		ShowConsoleCursor(false);
+		SMALL_RECT windowSize = {0 , 0 , 60 , 35}//terminal size
+    	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &windowSize)//terminal size
 	#endif
 	Snake* snake = (Snake*) malloc(sizeof(Snake));
 	char table[EDGE][EDGE + 1];
 	srand(time(NULL));
 	int best = 0;
 	do {
+		clear();
 		if (snake->snake_head != NULL)
 			destructor(snake);
 		snake->snake_head = constructor(EDGE / 2, EDGE / 2, SNAKE_HEAD);
@@ -79,7 +82,6 @@ int main() {
 } 
 
 void create_table(char (*table)[EDGE + 1], Snake* snake) {
-	clear();
 	for (int i = 0; i < EDGE; i++)
 		for (int j = 0; j < EDGE; j++)
 			table[i][j] = ' ';
