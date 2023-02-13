@@ -213,7 +213,7 @@ void print_table(char (*table)[EDGE + 1], int &result, int &best) {
 		printf("\n");
 	}
 	printf(CCYAN "Best Score: %d\n", best);
-	printf(CCYAN"Score: %d\n", result);
+	printf(CCYAN"Score: %d\n%s", result, CNORMAL);
 }
 
 void delay(double number_of_seconds) {
@@ -234,7 +234,7 @@ void generate_apple(char (*table)[EDGE + 1]) {
 bool choice(char (*table)[EDGE + 1]) {
 	char flag;
 	do {
-		printf("You lost. Try again -> [y], Quit -> [n]\n");
+		printf(CCYAN "You lost. Try again -> [y], Quit -> [n]\n%s", CNORMAL);
 		flag = getch();
 	} while (flag != 'y' && flag != 'n');
 	if (flag == 'n'|| (int) flag == 27) {
