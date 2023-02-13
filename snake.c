@@ -199,7 +199,11 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int &best) {
 }
 
 void print_table(char (*table)[EDGE + 1], int &result, int &best) {
-	clear();
+	#ifdef _WIN32
+		ClearScreen();
+	#else
+		clear();
+	#endif
 	printf(CCYAN "Canetizen Proudly Presents...\n");
 	printf(CCYAN "Press [w] - [a] - [s] - [d] to play. Press [ESC] to quit.\n");
 	printf("\n");
@@ -300,7 +304,7 @@ void eat(int x, int y, char (*table)[EDGE + 1], Snake* snake, int &result) {
 
 void clear() {
 	#ifdef _WIN32
-		ClearScreen();
+		system("cls");
 	#else
 		system("clear");
 	#endif
