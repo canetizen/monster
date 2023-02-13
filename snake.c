@@ -59,8 +59,8 @@ void clear();
 int main() {
 	#ifdef _WIN32
 		ShowConsoleCursor(false);
-		SMALL_RECT windowSize = {0 , 0 , 60 , 35}//terminal size
-    	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &windowSize)//terminal size
+		SMALL_RECT windowSize = {0 , 0 , 60 , 35};//terminal size
+    	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &windowSize);//terminal size
 	#endif
 	Snake* snake = (Snake*) malloc(sizeof(Snake));
 	char table[EDGE][EDGE + 1];
