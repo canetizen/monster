@@ -10,7 +10,7 @@
 
 //playground settings
 #define EDGE 25 // EDGE * EDGE playground
-#define DELAY 50 // in milliseconds
+#define DELAY 65 // in milliseconds
 #define EDGE_TYPE '%'
 #define SNAKE_HEAD 'X'
 #define SNAKE_BODY 'o'
@@ -184,15 +184,16 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int &best) {
 					}
 				}
 				default:
-				{
-					ch = previous_direction;
+				{	
+					printf(CCYAN "The game has stopped!\n%s", CNORMAL);
+					ch = getch();
 					continue;
 				}
 			}
 		    	if (result > best)
 				best = result;
 			print_table(table, result, best);
-			delay(DELAY - result * 0.1);
+			delay(DELAY - result * 0.05);
 		} while(!kbhit() && flag);
 	}
 	return choice(table);
@@ -204,19 +205,19 @@ void print_table(char (*table)[EDGE + 1], int &result, int &best) {
 	#else
 		clear();
 	#endif
-	printf(CCYAN "Canetizen Proudly Presents...\n");
-	printf(CCYAN "Press [w] - [a] - [s] - [d] to play. Press [ESC] to quit.\n");
+	printf(CCYAN "Canetizen Proudly Presents...\n%s", CNORMAL);
+	printf(CCYAN "Press [w] - [a] - [s] - [d] to play. Press [ESC] to quit.\n%s", CNORMAL);
 	printf("\n");
 	for (int i = 0; i < EDGE; i++) {
 		for (int j = 0; j < EDGE; j++) {			
 			if (table[i][j] == SNAKE_HEAD || table[i][j] == SNAKE_BODY) 
-				printf("%s%c", CGREEN, table[i][j]);
+				printf("%s%c%s", CGREEN, table[i][j], CNORMAL);
 			else
-				printf("%s%c", CNORMAL,table[i][j]);								 				
+				printf("%s%c%s", CNORMAL,table[i][j], CNORMAL);								 				
 		}
 		printf("\n");
 	}
-	printf(CCYAN "Best Score: %d\n", best);
+	printf(CCYAN "Best Score: %d\n%s", best, CNORMAL);
 	printf(CCYAN"Score: %d\n%s", result, CNORMAL);
 }
 
