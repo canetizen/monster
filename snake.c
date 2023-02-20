@@ -66,7 +66,8 @@ int main() {
 	char table[EDGE][EDGE + 1];
 	srand(time(NULL));
 	int best = 0;
-	do {
+	do {	
+		fflush(stdin);
 		clear();
 		if (snake->snake_head != NULL)
 			destructor(snake);
@@ -185,7 +186,7 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int &best) {
 				}
 				default:
 				{	
-					printf(CCYAN "The game has stopped!\n%s", CNORMAL);
+					printf(CCYAN "\nThe game has stopped!\n%s", CNORMAL);
 					ch = getch();
 					continue;
 				}
@@ -239,7 +240,7 @@ void generate_apple(char (*table)[EDGE + 1]) {
 bool choice(char (*table)[EDGE + 1]) {
 	char flag;
 	do {
-		printf(CCYAN "You lost. Try again -> [y], Quit -> [n]\n%s", CNORMAL);
+		printf(CCYAN "\nYou lost. Try again -> [y], Quit -> [n]\n%s", CNORMAL);
 		flag = getch();
 	} while (flag != 'y' && flag != 'n');
 	if (flag == 'n'|| (int) flag == 27) {
