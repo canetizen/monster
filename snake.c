@@ -262,7 +262,7 @@ void destructor(Snake* snake) {
 
 Body* constructor(int x, int y, char symbol) {
 	Body* new_body = (Body*) malloc(sizeof(Body));
-    	new_body->next = NULL;
+    new_body->next = NULL;
 	new_body->symbol = symbol;
 	new_body->x = x;
 	new_body->y = y;
