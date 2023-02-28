@@ -31,7 +31,7 @@ typedef struct Body{
 	struct Body* next = NULL;
 } Body;
 
-typedef struct {
+typedef struct Snake{
 	struct Body* snake_head = NULL;
 } Snake;
 
