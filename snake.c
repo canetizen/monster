@@ -4,10 +4,6 @@
 #include <conio.h>
 #include <stdbool.h>
 
-#ifdef _WIN32	
-	#include <windows.h>
-#endif
-
 //playground settings
 #define EDGE 25 // EDGE * EDGE playground
 #define DELAY 65 // in milliseconds
@@ -51,17 +47,7 @@ void destructor(Snake*);
 Body* constructor (int, int, char);
 void clear();
 
-#ifdef _WIN32
-	void ClearScreen();
-	void ShowConsoleCursor(bool); // hiding underscore cursor for Windows
-#endif
-
 int main() {
-	#ifdef _WIN32
-		ShowConsoleCursor(false);
-		SMALL_RECT windowSize = {0 , 0 , 60 , 35};//terminal size
-    	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &windowSize);//terminal size
-	#endif
 	Snake* snake = (Snake*) malloc(sizeof(Snake));
 	char table[EDGE][EDGE + 1];
 	srand(time(NULL));
@@ -201,11 +187,7 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int &best) {
 }
 
 void print_table(char (*table)[EDGE + 1], int &result, int &best) {
-	#ifdef _WIN32
-		ClearScreen();
-	#else
-		clear();
-	#endif
+	clear();
 	printf(CCYAN "Canetizen Proudly Presents...\n%s", CNORMAL);
 	printf(CCYAN "Press [w] - [a] - [s] - [d] to play. Press [ESC] to quit.\n%s", CNORMAL);
 	printf("\n");
@@ -311,20 +293,3 @@ void clear() {
 		system("clear");
 	#endif
 }
-
-#ifdef _WIN32
-	void ClearScreen() {	
-		COORD cursorPosition;	
-		cursorPosition.X = 0;	
-		cursorPosition.Y = 0;	
-		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPosition);
-	}
-
-	void ShowConsoleCursor(bool showFlag) {
-		HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-		CONSOLE_CURSOR_INFO     cursorInfo;
-		GetConsoleCursorInfo(out, &cursorInfo);
-		cursorInfo.bVisible = showFlag; // set the cursor visibility
-		SetConsoleCursorInfo(out, &cursorInfo);
-	}
-#endif
