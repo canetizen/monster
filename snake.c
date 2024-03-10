@@ -41,6 +41,7 @@ void eat(int, int, char (*table)[EDGE + 1], Snake*, int*);
 void destructor(Snake*);
 Body* constructor(int, int, char);
 void ncurses_config();
+void movement(int, int, char (*table)[EDGE + 1], Snake*, int*, bool*);
 
 int main() {
 	ncurses_config();	
@@ -96,16 +97,8 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int* best) {
 				return false;
 			case LEFT:
 				if (previous_direction != RIGHT) {
-					if (table[snake->snake_head->x][snake->snake_head->y - 1] != EDGE_TYPE &&
-						table[snake->snake_head->x][snake->snake_head->y - 1] != SNAKE_BODY) {
-						if (table[snake->snake_head->x][snake->snake_head->y - 1] == BAIT) {
-							eat(snake->snake_head->x, snake->snake_head->y - 1, table, snake, &result);
-						} else {
-							shift(snake->snake_head->x, snake->snake_head->y - 1, table, snake);
-						}
-						previous_direction = LEFT;
-					} else
-						flag = false;
+                    movement(snake->snake_head->x, snake->snake_head->y - 1, table, snake, &result, &flag);
+                    previous_direction = LEFT;
 					break;
 				} else {
 					ch = (int) RIGHT;
@@ -113,16 +106,8 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int* best) {
 				}
 			case RIGHT:
 				if (previous_direction != LEFT) {
-					if (table[snake->snake_head->x][snake->snake_head->y + 1] != EDGE_TYPE &&
-						table[snake->snake_head->x][snake->snake_head->y + 1] != SNAKE_BODY) {
-						if (table[snake->snake_head->x][snake->snake_head->y + 1] == BAIT) {
-							eat(snake->snake_head->x, snake->snake_head->y + 1, table, snake, &result);
-						} else {
-							shift(snake->snake_head->x, snake->snake_head->y + 1, table, snake);
-						}
-						previous_direction = RIGHT;
-					} else
-						flag = false;
+                    movement(snake->snake_head->x, snake->snake_head->y + 1, table, snake, &result, &flag);
+                    previous_direction = RIGHT;
 					break;
 				} else {
 					ch = (int) DOWN;
@@ -130,16 +115,8 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int* best) {
 				}
 			case UP:
 				if (previous_direction != DOWN) {
-					if (table[snake->snake_head->x - 1][snake->snake_head->y] != EDGE_TYPE &&
-						table[snake->snake_head->x - 1][snake->snake_head->y] != SNAKE_BODY) {
-						if (table[snake->snake_head->x - 1][snake->snake_head->y] == BAIT) {
-							eat(snake->snake_head->x - 1, snake->snake_head->y, table, snake, &result);
-						} else {
-							shift(snake->snake_head->x - 1, snake->snake_head->y, table, snake);
-						}
-						previous_direction = UP;
-					} else
-						flag = false;
+                    movement(snake->snake_head->x - 1, snake->snake_head->y, table, snake, &result, &flag);
+                    previous_direction = UP;
 					break;
 				} else {
 					ch = (int) DOWN;
@@ -147,16 +124,8 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int* best) {
 				}
 			case DOWN:
 				if (previous_direction != UP) {
-					if (table[snake->snake_head->x + 1][snake->snake_head->y] != EDGE_TYPE &&
-						table[snake->snake_head->x + 1][snake->snake_head->y] != SNAKE_BODY) {
-						if (table[snake->snake_head->x + 1][snake->snake_head->y] == BAIT) {
-							eat(snake->snake_head->x + 1, snake->snake_head->y, table, snake, &result);
-						} else {
-							shift(snake->snake_head->x + 1, snake->snake_head->y, table, snake);
-						}
-						previous_direction = DOWN;
-					} else
-						flag = false;
+                    movement(snake->snake_head->x + 1, snake->snake_head->y, table, snake, &result, &flag);
+                    previous_direction = DOWN;
 					break;
 				} else {
 					ch = (int) UP;
@@ -259,6 +228,18 @@ Body* constructor(int x, int y, char symbol) {
     new_body->x = x;
     new_body->y = y;
     return new_body;
+}
+
+void movement(int x, int y, char (*table)[EDGE + 1], Snake* snake, int* result, bool* flag) {
+    if (table[x][y] != EDGE_TYPE 
+        && table[x][y] != SNAKE_BODY) {
+        if (table[x][y] == BAIT) {
+            eat(x, y, table, snake, result);
+        } else {
+            shift(x, y, table, snake);
+        }
+    } else
+        *flag = false;
 }
 
 void shift(int x, int y, char (*table)[EDGE + 1], Snake* snake) {
