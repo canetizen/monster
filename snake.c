@@ -91,7 +91,6 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int* best) {
 			ch = getch(); // First movement
 			nodelay(stdscr, TRUE);
 		}
-		
 		switch (ch) {
 			case ESC:
 				return false;
@@ -164,7 +163,9 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int* best) {
 					continue;
 				}
 			default:
+                attron(COLOR_PAIR(1));
 				printw("\nThe game has stopped!\n");
+                attroff(COLOR_PAIR(1));
 				nodelay(stdscr, FALSE);
 				ch = getch();
 				nodelay(stdscr, TRUE);
@@ -173,7 +174,7 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int* best) {
 		if (result > *best)
 			*best = result;
 		print_table(table, &result, best);
-		delay((DELAY - result * 0.05) * 1000);
+		delay((DELAY - result) * 1000);
 
 		movement_check = getch(); // If any user input is given
 		if (movement_check != ERR) { // No user input
@@ -185,20 +186,29 @@ bool game(char (*table)[EDGE + 1], Snake* snake, int* best) {
 
 void print_table(char (*table)[EDGE + 1], int* result, int* best) {
 	clear();
+    attron(COLOR_PAIR(1));
     printw("Canetizen Proudly Presents...\n");
     printw("Press [w] - [a] - [s] - [d] to play. Press [ESC] to quit.\n");
     printw("\n");
+    attroff(COLOR_PAIR(1));
     for (int i = 0; i < EDGE; i++) {
         for (int j = 0; j < EDGE; j++) {
-            if (table[i][j] == SNAKE_HEAD || table[i][j] == SNAKE_BODY)
+            if (table[i][j] == SNAKE_HEAD || table[i][j] == SNAKE_BODY) {
+                attron(COLOR_PAIR(2));
                 printw("%c", table[i][j]);
-            else
+                attroff(COLOR_PAIR(2));
+            } else {
+                attron(COLOR_PAIR(3));
                 printw("%c", table[i][j]);
+                attroff(COLOR_PAIR(3));
+            }       
         }
         printw("\n");
     }
-    printw("Best Score: %d\n", *best);
+    attron(COLOR_PAIR(1));
+    printw("\nBest Score: %d\n", *best);
     printw("Score: %d\n", *result);
+    attroff(COLOR_PAIR(1));
     refresh();
 }
 
@@ -219,7 +229,9 @@ void generate_apple(char (*table)[EDGE + 1]) {
 bool choice(char (*table)[EDGE + 1]) {
     char flag;
     do {
+        attron(COLOR_PAIR(1));
         printw("\nYou lost. Try again -> [y], Quit -> [n]\n");
+        attroff(COLOR_PAIR(1));
 		nodelay(stdscr, FALSE);
         flag = getch();
     } while (flag != 'y' && flag != 'n');
@@ -286,8 +298,12 @@ void eat(int x, int y, char (*table)[EDGE + 1], Snake* snake, int* result) {
 
 void ncurses_config() {
 	initscr();
+    start_color();
     cbreak();
     noecho();
     curs_set(0);
     keypad(stdscr, TRUE);
+    init_pair(1, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    init_pair(3, COLOR_WHITE, COLOR_BLACK);
 }
