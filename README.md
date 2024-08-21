@@ -1,3 +1,5 @@
+# Snake
+
 Classic CLI snake game. The "ncurses" library must be installed, and the "-lncurses" flag should be added during the compilation stage.
 <br> 
 <br>
